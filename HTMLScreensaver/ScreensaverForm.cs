@@ -12,30 +12,33 @@ namespace HTMLScreensaver
         /// Creates a new screensaver form on the supplied screen number.
         /// </summary>
         /// <param name="screenNumber">The screen to create the screensaver form on.</param>
-        public ScreensaverForm(int screenNumber)
+        /// <param name="url">The URL to show.</param>
+        public ScreensaverForm(int screenNumber, string url)
         {
-            Initialise(screenNumber);
+            Initialise(screenNumber, url);
         }
 
         /// <summary>
         /// Initialises the screensaver form.
         /// </summary>
         /// <param name="screenNumber">The screen to initialise the screensaver form on.</param>
-        private void Initialise(int screenNumber)
+        /// <param name="url">The URL to show.</param>
+        private void Initialise(int screenNumber, string url)
         {
             //Remove all borders and match the screen bounds so the form fills the screen
             FormBorderStyle = FormBorderStyle.None;
             Bounds = Screen.AllScreens[screenNumber].Bounds;
 
             //Add the content to the form
-            AddControls();
+            AddControls(url);
             AddEventHandlers();
         }
 
         /// <summary>
         /// Adds the controls to the screensaver form.
         /// </summary>
-        private void AddControls()
+        /// <param name="url">The URL to show</param>
+        private void AddControls(string url)
         {
             //Clear any existing controls
             Controls.Clear();
@@ -44,7 +47,7 @@ namespace HTMLScreensaver
             var browser = new FixedWebBrowser()
             {
                 Bounds = Bounds,
-                Url = new Uri("https://www.google.co.uk")
+                Url = new Uri(url)
             };
 
             browser.PreviewKeyDown += HandleKeyEvent;

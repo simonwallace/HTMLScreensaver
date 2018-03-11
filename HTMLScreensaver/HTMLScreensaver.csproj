@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -57,9 +58,14 @@
     <Compile Include="ScreensaverForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Settings\ScreenElementCollection.cs" />
+    <Compile Include="Settings\ScreensaverSection.cs" />
+    <Compile Include="Settings\ScreenSection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
