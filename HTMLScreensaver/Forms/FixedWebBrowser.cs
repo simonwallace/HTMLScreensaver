@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace HTMLScreensaver
+namespace HTMLScreensaver.Forms
 {
     /// <summary>
     /// A web browser control that cannot be interacted with.

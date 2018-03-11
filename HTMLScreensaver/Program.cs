@@ -1,5 +1,7 @@
-﻿using HTMLScreensaver.Settings;
+﻿using HTMLScreensaver.Forms;
+using HTMLScreensaver.Settings;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -25,7 +27,9 @@ namespace HTMLScreensaver
             //Get the configuration for the application
             var config = ScreensaverSection.GetConfig();
 
-            //Start the application on all available screens
+            //Build a list of all the forms to display
+            var forms = new List<ScreensaverForm>();
+
             for (var i = 0; i < config.Screens.Count; i++)
             {
                 //Get the screen configuration
@@ -41,10 +45,13 @@ namespace HTMLScreensaver
                 if (number >= Screen.AllScreens.GetLowerBound(0)
                     && number <= Screen.AllScreens.GetUpperBound(0))
                 {
-                    //Display the screensaver
-                    Application.Run(new ScreensaverForm(number, url));
+                    //Add the screensaver to the list of forms
+                    forms.Add(new ScreensaverForm(number, url));
                 }
             }
+
+            //Start the screensaver forms
+            Application.Run(new MultiFormContext(forms.ToArray()));
         }
 
         [DllImport("user32.dll")]

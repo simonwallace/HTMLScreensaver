@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace HTMLScreensaver
+namespace HTMLScreensaver.Forms
 {
     /// <summary>
     /// A form that can be used as a screensaver.
