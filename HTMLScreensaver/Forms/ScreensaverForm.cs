@@ -8,6 +8,9 @@ namespace HTMLScreensaver.Forms
     /// </summary>
     public class ScreensaverForm : Form
     {
+        /// <summary>Records whether the form has loaded or not.</summary>
+        private bool? loaded;
+
         /// <summary>
         /// Creates a new screensaver form on the supplied screen number.
         /// </summary>
@@ -50,7 +53,8 @@ namespace HTMLScreensaver.Forms
                 Url = new Uri(url)
             };
 
-            browser.PreviewKeyDown += HandleKeyEvent;
+            browser.DocumentCompleted += HandleBrowserLoadEvent;
+            browser.PreviewKeyDown += HandleBrowserKeyEvent;
 
             //Add the controls to the form
             Controls.Add(browser);
@@ -71,10 +75,63 @@ namespace HTMLScreensaver.Forms
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The event arguments.</param>
-        private void HandleKeyEvent(object sender, PreviewKeyDownEventArgs e)
+        private void HandleBrowserKeyEvent(object sender, PreviewKeyDownEventArgs e)
         {
             //Close the form
             Close();
+        }
+
+        /// <summary>
+        /// Handles load events on the web browser.
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">The event arguments.</param>
+        private void HandleBrowserLoadEvent(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            //If the sender is a web browser
+            if (sender is WebBrowser)
+            {
+                var webBrowser = sender as WebBrowser;
+
+                //Add the mouse event handlers
+                webBrowser.Document.MouseDown += HandleBrowserMouseDownEvent;
+                webBrowser.Document.MouseMove += HandleBrowserMouseMoveEvent;
+            }
+        }
+
+        /// <summary>
+        /// Handles mouse down events on the web browser.
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">The event arguments.</param>
+        private void HandleBrowserMouseDownEvent(object sender, HtmlElementEventArgs e)
+        {
+            //Close the form
+            Close();
+        }
+
+        /// <summary>
+        /// Handles mouse move events on the web browser.
+        /// </summary>
+        /// <param name="sender">The sender object.</param>
+        /// <param name="e">The event arguments.</param>
+        private void HandleBrowserMouseMoveEvent(object sender, HtmlElementEventArgs e)
+        {
+            //Ignore the first trigger which occurs when the browser has loaded
+            if (!loaded.HasValue)
+            {
+                loaded = false;
+            }
+            //Ignore the second trigger which occurs when the cursor first appears
+            else if (!loaded.Value)
+            {
+                loaded = true;
+            }
+            //Close the form the next time the cursor moves
+            else
+            {
+                Close();
+            }
         }
 
         /// <summary>
