@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-namespace HTMLScreensaver.Settings
+namespace HTMLScreensaver.Configuration
 {
     /// <summary>
     /// The screen section configuration.

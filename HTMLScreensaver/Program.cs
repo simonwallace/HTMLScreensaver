@@ -1,5 +1,5 @@
-﻿using HTMLScreensaver.Forms;
-using HTMLScreensaver.Settings;
+﻿using HTMLScreensaver.Configuration;
+using HTMLScreensaver.Forms;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;

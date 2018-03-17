@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-namespace HTMLScreensaver.Settings
+namespace HTMLScreensaver.Configuration
 {
     /// <summary>
     /// The root configuration class for the application.
