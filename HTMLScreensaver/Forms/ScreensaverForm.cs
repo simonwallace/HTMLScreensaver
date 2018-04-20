@@ -143,9 +143,6 @@ namespace HTMLScreensaver.Forms
         {
             //Force the form to appear above all other forms
             TopMost = true;
-
-            //Hide the cursor
-            Cursor.Hide();
         }
     }
 }
