@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace HTMLScreensaver.Forms
@@ -8,8 +9,14 @@ namespace HTMLScreensaver.Forms
     /// </summary>
     public class ScreensaverForm : Form
     {
-        /// <summary>Records whether the form has loaded or not.</summary>
-        private bool? loaded;
+        /// <summary>The starting position of the mouse cursor.</summary>
+        private Point mouseStartPosition;
+
+
+        /// <summary>The number of pixels the mouse cursor can move in either direction before
+        /// a move event is triggered.</summary>
+        public int MouseMovePixelSensitivity { get; set; } = 50;
+
 
         /// <summary>
         /// Creates a new screensaver form on the supplied screen number.
@@ -20,6 +27,7 @@ namespace HTMLScreensaver.Forms
         {
             Initialise(screenNumber, url);
         }
+
 
         /// <summary>
         /// Initialises the screensaver form.
@@ -117,18 +125,14 @@ namespace HTMLScreensaver.Forms
         /// <param name="e">The event arguments.</param>
         private void HandleBrowserMouseMoveEvent(object sender, HtmlElementEventArgs e)
         {
-            //Ignore the first trigger which occurs when the browser has loaded
-            if (!loaded.HasValue)
+            //Record the first mouse position
+            if (mouseStartPosition == Point.Empty)
             {
-                loaded = false;
+                mouseStartPosition = e.MousePosition;
             }
-            //Ignore the second trigger which occurs when the cursor first appears
-            else if (!loaded.Value)
-            {
-                loaded = true;
-            }
-            //Close the form the next time the cursor moves
-            else
+            //Close the form if the mouse moves outside the range
+            else if (Math.Abs(e.MousePosition.X - mouseStartPosition.X) > MouseMovePixelSensitivity
+                || Math.Abs(e.MousePosition.Y - mouseStartPosition.Y) > MouseMovePixelSensitivity)
             {
                 Close();
             }
