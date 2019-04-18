@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace HTMLScreensaver
@@ -23,7 +22,7 @@ namespace HTMLScreensaver
         {
             //The mode is the first argument
             var modeArg = args.FirstOrDefault()?.Trim().ToLower();
-            Mode mode = Mode.UNDEFINED;
+            var mode = Mode.UNDEFINED;
             
             //If the argument is the minimum length
             if (modeArg?.Length >= 2)
@@ -41,9 +40,6 @@ namespace HTMLScreensaver
 
             try
             {
-                //Fix blur on high resolution screens
-                SetProcessDPIAware();
-
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
@@ -106,8 +102,5 @@ namespace HTMLScreensaver
                 Environment.Exit(Convert.ToInt32(ExitCodes.ERROR));
             }
         }
-
-        [DllImport("user32.dll")]
-        private static extern bool SetProcessDPIAware();
     }
 }

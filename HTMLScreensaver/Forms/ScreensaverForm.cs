@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Forms.UI.Controls;
+using Microsoft.Toolkit.Win32.UI.Controls.Interop.WinRT;
+using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -9,15 +12,6 @@ namespace HTMLScreensaver.Forms
     /// </summary>
     public class ScreensaverForm : Form
     {
-        /// <summary>The starting position of the mouse cursor.</summary>
-        private Point mouseStartPosition;
-
-
-        /// <summary>The number of pixels the mouse cursor can move in either direction before
-        /// a move event is triggered.</summary>
-        public int MouseMovePixelSensitivity { get; set; } = 50;
-
-
         /// <summary>
         /// Creates a new screensaver form on the supplied screen number.
         /// </summary>
@@ -36,13 +30,15 @@ namespace HTMLScreensaver.Forms
         /// <param name="url">The URL to show.</param>
         private void Initialise(int screenNumber, string url)
         {
-            //Remove all borders and match the screen bounds so the form fills the screen
+            // Remove all borders and match the screen bounds so the form fills the screen
             FormBorderStyle = FormBorderStyle.None;
-            Bounds = Screen.AllScreens[screenNumber].Bounds;
 
-            //Add the content to the form
+            // The form should appear above all others
+            TopMost = true;
+
+            SetBounds(screenNumber);
+
             AddControls(url);
-            AddEventHandlers();
         }
 
         /// <summary>
@@ -51,102 +47,84 @@ namespace HTMLScreensaver.Forms
         /// <param name="url">The URL to show</param>
         private void AddControls(string url)
         {
-            //Clear any existing controls
-            Controls.Clear();
+            PreviewKeyDown += HandleCloseEvent;
 
             //Create a new fixed web browser
-            var browser = new FixedWebBrowser()
+            var browser = new WebView()
             {
                 Bounds = Bounds,
-                Url = new Uri(url)
+                Dock = DockStyle.Fill
             };
 
-            browser.DocumentCompleted += HandleBrowserLoadEvent;
-            browser.PreviewKeyDown += HandleBrowserKeyEvent;
+            ISupportInitialize initalisableBrowser = browser;
+
+            initalisableBrowser.BeginInit();
+
+            browser.IsScriptNotifyAllowed = true;
+
+            browser.Click += HandleCloseEvent;
+            browser.PreviewKeyDown += HandleCloseEvent;
+
+            browser.DOMContentLoaded += HandleBrowserLoadEvent;
+            browser.ScriptNotify += ScriptNotify;
+            
+            initalisableBrowser.EndInit();
+
+            browser.Navigate(new Uri(url));
 
             //Add the controls to the form
             Controls.Add(browser);
         }
 
-        /// <summary>
-        /// Adds the event handlers to the screensaver form.
-        /// </summary>
-        private void AddEventHandlers()
+        private void ScriptNotify(object sender, WebViewControlScriptNotifyEventArgs e)
         {
-            //Re-add the event handlers
-            Load -= HandleLoadEvent;
-            Load += HandleLoadEvent;
-        }
-
-        /// <summary>
-        /// Handles key events on the web browser.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The event arguments.</param>
-        private void HandleBrowserKeyEvent(object sender, PreviewKeyDownEventArgs e)
-        {
-            //Close the form
             Close();
         }
 
         /// <summary>
-        /// Handles load events on the web browser.
+        /// Handles close events on the web browser.
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The event arguments.</param>
-        private void HandleBrowserLoadEvent(object sender, WebBrowserDocumentCompletedEventArgs e)
+        private void HandleCloseEvent(object sender, EventArgs e)
         {
-            //If the sender is a web browser
-            if (sender is WebBrowser)
-            {
-                var webBrowser = sender as WebBrowser;
-
-                //Add the mouse event handlers
-                webBrowser.Document.MouseDown += HandleBrowserMouseDownEvent;
-                webBrowser.Document.MouseMove += HandleBrowserMouseMoveEvent;
-            }
-        }
-
-        /// <summary>
-        /// Handles mouse down events on the web browser.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The event arguments.</param>
-        private void HandleBrowserMouseDownEvent(object sender, HtmlElementEventArgs e)
-        {
-            //Close the form
             Close();
         }
 
         /// <summary>
-        /// Handles mouse move events on the web browser.
+        /// Once the web page is loaded, event handlers are added to the page which will close the form.
+        /// These will trigger when the user presses a key, moves the mouse, or clicks the pointer device.
         /// </summary>
         /// <param name="sender">The sender object.</param>
         /// <param name="e">The event arguments.</param>
-        private void HandleBrowserMouseMoveEvent(object sender, HtmlElementEventArgs e)
+        private async void HandleBrowserLoadEvent(object sender, EventArgs e)
         {
-            //Record the first mouse position
-            if (mouseStartPosition == Point.Empty)
+            if (sender is WebView webView)
             {
-                mouseStartPosition = e.MousePosition;
-            }
-            //Close the form if the mouse moves outside the range
-            else if (Math.Abs(e.MousePosition.X - mouseStartPosition.X) > MouseMovePixelSensitivity
-                || Math.Abs(e.MousePosition.Y - mouseStartPosition.Y) > MouseMovePixelSensitivity)
-            {
-                Close();
+                await webView.InvokeScriptAsync("eval", new string[]
+                {
+                    "document.addEventListener('keydown', function() { window.external.notify(''); });"
+                    + "document.addEventListener('mouseover', function() { window.external.notify(''); });"
+                    + "document.addEventListener('click', function() { window.external.notify(''); });"
+                });
             }
         }
 
         /// <summary>
-        /// Handles load events on the screensaver form.
+        /// Sets the bounds for the supplied screen number.
         /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The event arguments.</param>
-        private void HandleLoadEvent(object sender, EventArgs e)
+        /// <param name="screenNumber">The screen number.</param>
+        private void SetBounds(int screenNumber)
         {
-            //Force the form to appear above all other forms
-            TopMost = true;
+            var bounds = Screen.AllScreens[screenNumber].Bounds;
+
+            using (var graphics = CreateGraphics())
+            {
+                bounds.Width = Convert.ToInt32(bounds.Width * graphics.DpiX / 96);
+                bounds.Height = Convert.ToInt32(bounds.Height * graphics.DpiY / 96);
+            }
+
+            Bounds = bounds;
         }
     }
 }
